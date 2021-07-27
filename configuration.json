@@ -4,7 +4,7 @@
     "font-color":"white",
     "selected-color": "yellow",
     "key-color":"yellow",
-    "max-key-length": 15,
+    "max-key-length": 20,
     "key-left-margin": 5,
     "key-font":[
         "微软雅黑",

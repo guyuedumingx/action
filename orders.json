@@ -1,6 +1,11 @@
 {
     "Wechat" : "start F:\\WeChat\\WeChat.exe",
     "Code" : "code.cmd",
-    "Csdn" : "start msedge https://www.csdn.net/",
-    "BaiDu" : "start msedge https://www.baidu.com/s?wd=$@"
+    "Csdn" : "start msedge https://so.csdn.net/so/search?q=$@",
+    "BaiDu" : "start msedge https://www.baidu.com/s?wd=$@",
+    "Bing" : "start msedge https://cn.bing.com/search?q=$@",
+    "ZhiHu" : "start msedge https://www.zhihu.com/search?q=$@",
+    "Runoob" : "start msedge https://www.runoob.com/?s=$@",
+    "Open" : "start msedge $@",
+    "Cmder" : "start F:\\package\\cmder\\cmder.exe"
 }

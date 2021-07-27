@@ -71,7 +71,7 @@ class Bar:
         # 结果集的label gui
         self.result_labels = {}
         # 当前被选中的结果下标
-        self.selected_index = 0
+        self.selected_index = -1 
         # 当前被选中的结果
         self.selected_label = None
 
@@ -89,21 +89,41 @@ class Bar:
         self.key_label.bind("<BackSpace>", self.delete)
         self.key_label.bind("<Escape>", self.hide)
         self.key_label.bind("<Tab>", self.next)
+        self.key_label.bind("<KeyPress-Right>", self.next)
+        self.key_label.bind("<KeyPress-Down>", self.next)
+        self.key_label.bind("<KeyPress-Left>", self.preview)
+        self.key_label.bind("<KeyPress-Up>", self.preview)
+        self.key_label.bind("<Control-u>", self.clear)
         self.result_frame.pack(side='left')
 
         self.update()
         self.win.mainloop()
 
-    def next(self, event):
-        if(len(self.result) > 0):
+    def clear(self, event):
+        self._update_order("")
+        self.update()
+
+    def preview(self, event):
+        self.selected_index -= 1
+        if(self.selected_index < 0):
+            self.selected_index = len(self.result) - 1
+        try:
             self.order = self.result[self.selected_index]
             self.selected(self.order)
             self._update_order(self.order)
-        if(self.selected_index >= len(self.result)-1):
-            self.selected_index = 0
-        else:
-            self.selected_index += 1
+        except:
+            pass
 
+    def next(self, event):
+        self.selected_index += 1
+        if(self.selected_index > len(self.result)-1):
+            self.selected_index = 0
+        try:
+            self.order = self.result[self.selected_index]
+            self.selected(self.order)
+            self._update_order(self.order)
+        except:
+            pass
 
     def delete(self, event):
         self.order = self.order[:-1]
@@ -170,7 +190,7 @@ class Bar:
     def update(self):
         for widget in self.result_frame.winfo_children():
             widget.destroy()
-        name = self.order.split(" ")[0]
+        name = self.order.split(" ")[0].lower()
         self.resule_labels = {}
         self.result = []
         for ord in self.orders:
