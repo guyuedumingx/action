@@ -1,0 +1,26 @@
+{
+    "windows-title": "ww",
+    "background-color":"#323233",
+    "font-color":"white",
+    "selected-color": "yellow",
+    "key-color":"yellow",
+    "max-key-length": 15,
+    "key-left-margin": 5,
+    "key-font":[
+        "微软雅黑",
+        "14",
+        "bold"
+    ],
+    "result-font":[
+        "微软雅黑",
+        "12"
+    ],
+    "windows-height":30,
+    "scripts-path": "script/",
+    "scripts-suffix": "ww",
+    "active-hotkey": [
+        "alt",
+        "p"
+    ]
+
+}
