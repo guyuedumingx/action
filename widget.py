@@ -4,6 +4,46 @@ from tkinter import *
 from system_hotkey import SystemHotkey
 import win32gui
 import json
+import socket
+import winreg
+
+
+def load_software():
+
+    #需要遍历的两个注册表, 
+    sub_key = [r'SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths', r'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', r'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall']
+    
+    software_name = {}
+    
+    for i in sub_key:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, i, 0, winreg.KEY_ALL_ACCESS)
+        for j in range(0, winreg.QueryInfoKey(key)[0]-1):
+            try:
+                key_name = winreg.EnumKey(key, j)
+                key_path = i + '\\' + key_name
+                each_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_ALL_ACCESS)
+                try:
+                    Pos, REG_SZ = winreg.QueryValueEx(each_key, '')
+                except:
+                    DisplayName, REG_SZ = winreg.QueryValueEx(each_key, 'DisplayName')
+                    if len(DisplayName) > 15:
+                        key_name = DisplayName[0:15]
+                        split = key_name.split(" ")
+                        if len(split) > 2:
+                            key_name = "-".join(split[0:2])
+                    Pos, REG_PS = winreg.QueryValueEx(each_key, 'DisplayIcon')
+                    Pos = Pos.split(",")[0]
+                try:
+                    name = key_name.split(".")[0]
+                except:
+                    name = key_name
+                # if "C:" in Pos:
+                #     print(Pos)
+                #     Pos = Pos.split("\\")[-1]
+                software_name[name] = Pos
+            except WindowsError:
+                pass
+    return software_name
 
 def load_json(name):
     with open(name, "r", encoding="utf-8") as f:
@@ -16,6 +56,7 @@ def load_scripts(config):
     scripts = load_json("orders.json")
     loads = {name.split(".")[0]:"python "+ config.script + name + " $@" for name in os.listdir(config.script) if name.endswith(".py")}
     scripts.update(loads)
+    scripts.update(load_software())
     return scripts
 
 class Config:
@@ -163,10 +204,34 @@ class Bar:
         try:
             act = self.orders[name]
             ord = act.replace("$@", " ".join(avgs))
+            ord = self.chdir(ord)
             os.system(ord)
         except:
             os.system(self.order)
         self.hide()
+
+    def chdir(self, action):
+        split = action.split("\\") 
+        sub_paths = split[1:-1]
+        flag = False
+        if len(sub_paths) > 0:
+            for path in sub_paths:
+                if " " in path:
+                    flag = True
+                    break
+            if not flag:
+                return action
+            else:
+                heads = split[0].split(" ")
+                head = heads[-1]
+                os.chdir(head) 
+                for path in sub_paths:
+                    os.chdir(path) 
+                tail = split[-1]
+                return " ".join(heads[:-1]) + " " + tail
+        else:
+            return action
+
 
     def hide(self, event=None):
         self.selected_index = 0
