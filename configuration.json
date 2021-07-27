@@ -17,6 +17,7 @@
     ],
     "windows-height":30,
     "scripts-path": "script/",
+    "scripts-file": "orders.json",
     "scripts-suffix": "ww",
     "active-hotkey": [
         "alt",
