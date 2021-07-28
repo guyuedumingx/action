@@ -4,11 +4,21 @@ from tkinter import *
 from system_hotkey import SystemHotkey
 import win32gui
 import json
-import socket
 import winreg
 
 
-def load_software():
+def load_lib(config):
+    libs = config.libs
+    commands = {}
+    for lib in libs:
+        coms = os.listdir(lib)
+        for comm in coms:
+            if comm.endswith("lnk") or comm.endswith("exe"):
+                name = comm.split(".")[0]
+                commands[name] = lib + "\\" + comm
+    return commands
+
+def load_software(config):
 
     #需要遍历的两个注册表, 
     sub_key = [r'SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths', r'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', r'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall']
@@ -40,7 +50,26 @@ def load_software():
                 software_name[name] = Pos
             except WindowsError:
                 pass
+    filter(config, software_name)
+    rename(config, software_name)
     return software_name
+
+def filter(config, software):
+    names = config.filters
+    for name in names:
+        try:
+            del software[name]
+        except:
+            pass
+
+def rename(config, software):
+    names = config.rename
+    for name in names.keys():
+        try:
+            software[names[name]] = software[name]
+            del software[name]
+        except:
+            pass
 
 def load_json(name):
     with open(name, "r", encoding="utf-8") as f:
@@ -51,9 +80,15 @@ config_info = load_json("configuration.json")
 
 def load_scripts(config):
     scripts = load_json("orders.json")
-    loads = {name.split(".")[0]:"python "+ config.script + name + " $@" for name in os.listdir(config.script) if name.endswith(".py")}
-    scripts.update(loads)
-    scripts.update(load_software())
+    for script in config.script:
+        loads = {name.split(".")[0]:"python "+ script + name + " $@" for name in os.listdir(script) if name.endswith(".py")}
+        scripts.update(loads)
+    scripts.update(load_lib(config))
+    if(config.load_software):
+        try:
+            scripts.update(load_software(config))
+        except:
+            pass
     return scripts
 
 class Config:
@@ -84,6 +119,12 @@ class Config:
         self.active_hotkey = tuple(config['active-hotkey'])
         # 选中高亮颜色
         self.selected_color = config['selected-color']
+        # rename
+        self.rename = config['rename']
+        self.selected_bg = config['selected-background-color']
+        self.load_software = config['load-software']
+        self.filters = config['filters']
+        self.libs = config['lib-path']
 
 
 class Bar:
@@ -128,6 +169,7 @@ class Bar:
         self.key_label.bind("<BackSpace>", self.delete)
         self.key_label.bind("<Escape>", self.hide)
         self.key_label.bind("<Tab>", self.next)
+        self.key_label.bind("<Control-v>", self.paste_action)
         self.key_label.bind("<KeyPress-Right>", self.next)
         self.key_label.bind("<KeyPress-Down>", self.next)
         self.key_label.bind("<KeyPress-Left>", self.preview)
@@ -188,6 +230,19 @@ class Bar:
         widget = event.widget
         name = widget['text']
         self.action(name)
+    
+    def mouse_copy(self, event):
+        widget = event.widget
+        name = widget['text']
+        print(name)
+        self.win.clipboard_clear()
+        self.win.clipboard_append(name)
+        self.win.update()
+    
+    def paste_action(self, event):
+        paste = self.win.clipboard_get()
+        self._update_order(paste)
+        self.update()
 
     def mouse_hover(self, event):
         widget = event.widget
@@ -207,11 +262,17 @@ class Bar:
     def action(self, name, avgs=[]):
         try:
             act = self.orders[name]
-            ord = act.replace("$@", " ".join(avgs))
-            ord = self.chdir(ord)
-            os.system(ord)
+            if "exit" == act:
+                self.win.destroy()
+            else:
+                ord = act.replace("$@", " ".join(avgs))
+                ord = self.chdir(ord)
+                os.system(ord)
         except:
-            os.system(self.order)
+            try:
+                self.action(name + " " + " ".join(avgs))
+            except:
+                os.system(self.order)
         self.hide()
 
     def chdir(self, action):
@@ -227,11 +288,14 @@ class Bar:
                 return action
             else:
                 heads = split[0].split(" ")
-                head = heads[-1]
-                os.chdir(head) 
+                res = heads[-1].replace('"',"")
+                head = res+"\\"
+                os.chdir(head)
                 for path in sub_paths:
-                    os.chdir(path) 
-                tail = split[-1]
+                    os.chdir(path)
+                tails = split[-1]
+
+                tail = tails.replace('"',"")
                 return " ".join(heads[:-1]) + " " + tail
         else:
             return action
@@ -263,6 +327,7 @@ class Bar:
             if name in ord.lower():
                 self.result.append(ord)
         self.result.sort(key=len)
+        self.last_index = 0
         self.show_next_page()
     
     def show_preview_page(self):
@@ -276,11 +341,14 @@ class Bar:
         for title in shows:
             label = Label(self.result_frame, text=title, fg=self.config.fg, bg=self.config.bg, font=self.config.result_font, padx = 5)
             label.bind('<Button-1>', self.mouse_action)
+            label.bind('<Button-3>', self.mouse_copy)
             label.bind('<Enter>', self.mouse_hover)
             label.pack(side=RIGHT)
             self.win.update()
-            print(label.winfo_width())
-            length += label.winfo_width()
+            try:
+                length += label.winfo_width()
+            except:
+                pass
             if length > self.result_frame_width:
                 label.destroy()
                 break
@@ -291,35 +359,36 @@ class Bar:
         self.result_labels = {}
         for widget in self.result_frame.winfo_children():
             widget.destroy()
-
-        length = 0
-        for title in self.result[self.last_index:]:
-            label = Label(self.result_frame, text=title, fg=self.config.fg, bg=self.config.bg, font=self.config.result_font, padx = 5)
-            label.bind('<Button-1>', self.mouse_action)
-            label.bind('<Enter>', self.mouse_hover)
-            label.pack(side='left')
-            self.win.update()
-            length += label.winfo_width()
-            if length > self.result_frame_width:
-                label.destroy()
-                break
-            # x = label.winfo_x()
-            # if len(self.result_labels)>0 and x == 0:
-            #     label.destroy()
-            #     break
-            else:
-                self.result_labels[title] = label
-                self.last_index += 1
+        if len(self.result) > 0:
+            length = 0
+            shows = self.result[self.last_index:]
+            for i in range(len(shows)):
+                tit = shows[i]
+                label = Label(self.result_frame, text=tit, fg=self.config.fg, bg=self.config.bg, font=self.config.result_font, padx = 5)
+                label.bind('<Button-1>', self.mouse_action)
+                label.bind('<Button-3>', self.mouse_copy)
+                label.bind('<Enter>', self.mouse_hover)
+                label.pack(side='left')
+                self.win.update()
+                try:
+                    length += label.winfo_width()
+                except:
+                    pass
+                if length > self.result_frame_width:
+                    label.destroy()
+                    break
+                else:
+                    self.result_labels[tit] = label
+                    self.last_index += 1
 
 
     def selected(self, name):
         try:
-            self.selected_label.configure(fg=self.config.fg)
+            self.selected_label.configure(fg=self.config.fg, bg=self.config.bg)
         except:
             pass
         self.selected_label = self.result_labels[name]
-        self.result_labels[name].configure(fg=self.config.selected_color)
-
+        self.result_labels[name].configure(fg=self.config.selected_color, bg=self.config.selected_bg)
 
 config = Config(config_info)
 bar = Bar(config, load_scripts(config)) 

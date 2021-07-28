@@ -3,9 +3,11 @@
     "background-color":"#323233",
     "font-color":"white",
     "selected-color": "yellow",
+    "selected-background-color": "#7E7E7E",
     "key-color":"yellow",
     "max-key-length": 20,
     "key-left-margin": 5,
+    "load-software": true,
     "key-font":[
         "微软雅黑",
         "14",
@@ -16,12 +18,17 @@
         "12"
     ],
     "windows-height":30,
-    "scripts-path": "script/",
+    "scripts-path": ["script/"],
+    "lib-path" : ["C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories"],
     "scripts-file": "orders.json",
-    "scripts-suffix": "ww",
     "active-hotkey": [
         "alt",
         "p"
-    ]
+    ],
+    "filters":[
+    ],
+    "rename":{
+        "pbrush" : "画图"
+    }
 
 }

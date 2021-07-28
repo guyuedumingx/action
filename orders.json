@@ -6,5 +6,8 @@
     "ZhiHu" : "start msedge https://www.zhihu.com/search?q=$@",
     "Runoob" : "start msedge https://www.runoob.com/?s=$@",
     "Open" : "start msedge $@",
-    "Cmder" : "start F:\\package\\cmder\\cmder.exe"
+    "Cmder" : "start F:\\package\\cmder\\cmder.exe",
+    "Bili" : "start msedge https://search.bilibili.com/all?keyword=$@",
+    "Explorer" : "explorer $@",
+    "Exit" : "exit"
 }
