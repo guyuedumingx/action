@@ -1,5 +1,4 @@
 {
-    "Wechat" : "start F:\\WeChat\\WeChat.exe",
     "Code" : "code.cmd",
     "Csdn" : "start msedge https://so.csdn.net/so/search?q=$@",
     "BaiDu" : "start msedge https://www.baidu.com/s?wd=$@",

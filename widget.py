@@ -37,9 +37,6 @@ def load_software():
                     name = key_name.split(".")[0]
                 except:
                     name = key_name
-                # if "C:" in Pos:
-                #     print(Pos)
-                #     Pos = Pos.split("\\")[-1]
                 software_name[name] = Pos
             except WindowsError:
                 pass
@@ -97,8 +94,8 @@ class Bar:
         # 系统热键
         self.hk = SystemHotkey()
 
-        screen_width = self.win.winfo_screenwidth()
-        self.win.geometry(str(screen_width)+"x"+str(config.windows_height))
+        self.screen_width = self.win.winfo_screenwidth()
+        self.win.geometry(str(self.screen_width)+"x"+str(config.windows_height))
         self.win['background'] = config.bg
         self.win.title(config.windows_title)
         self.win.overrideredirect(True)
@@ -115,6 +112,7 @@ class Bar:
         self.selected_index = -1 
         # 当前被选中的结果
         self.selected_label = None
+        self.last_index = 0
 
         # 表示关键字的label
         self.key_label = Label(self.win, anchor='w',textvariable=self.key, bd=config.key_left_margin, fg=config.key_fg, bg=config.bg, width=config.max_key_length, font=config.key_font)
@@ -136,6 +134,10 @@ class Bar:
         self.key_label.bind("<KeyPress-Up>", self.preview)
         self.key_label.bind("<Control-u>", self.clear)
         self.result_frame.pack(side='left')
+        self.win.update()
+        self.result_frame_width = self.screen_width-self.result_frame.winfo_x()
+        self.result_frame.configure(width=self.result_frame_width)
+        self.win.update()
 
         self.update()
         self.win.mainloop()
@@ -147,9 +149,10 @@ class Bar:
     def preview(self, event):
         self.selected_index -= 1
         if(self.selected_index < 0):
-            self.selected_index = len(self.result) - 1
+            self.show_preview_page()
+            self.selected_index = len(self.result_labels) - 1
         try:
-            self.order = self.result[self.selected_index]
+            self.order = self.result[self.selected_index+self.last_index-len(self.result_labels)]
             self.selected(self.order)
             self._update_order(self.order)
         except:
@@ -157,10 +160,11 @@ class Bar:
 
     def next(self, event):
         self.selected_index += 1
-        if(self.selected_index > len(self.result)-1):
+        if(self.selected_index > len(self.result_labels)-1):
             self.selected_index = 0
+            self.show_next_page()
         try:
-            self.order = self.result[self.selected_index]
+            self.order = self.result[self.selected_index+self.last_index-len(self.result_labels)]
             self.selected(self.order)
             self._update_order(self.order)
         except:
@@ -177,7 +181,7 @@ class Bar:
     def deal(self, event):
         self.order += event.char
         self._update_order(self.order)
-        self.selected_index = 0
+        self.selected_index = -1 
         self.update()
 
     def mouse_action(self, event):
@@ -253,21 +257,60 @@ class Bar:
             self.key.set(self.order)
     
     def update(self):
-        for widget in self.result_frame.winfo_children():
-            widget.destroy()
         name = self.order.split(" ")[0].lower()
-        self.resule_labels = {}
         self.result = []
         for ord in self.orders:
             if name in ord.lower():
                 self.result.append(ord)
         self.result.sort(key=len)
-        for title in self.result:
+        self.show_next_page()
+    
+    def show_preview_page(self):
+        self.last_index = self.last_index - len(self.result_labels)
+        self.result_labels = {}
+        for widget in self.result_frame.winfo_children():
+            widget.destroy()
+        shows = self.result[:self.last_index]
+        shows.reverse()
+        length = 0
+        for title in shows:
+            label = Label(self.result_frame, text=title, fg=self.config.fg, bg=self.config.bg, font=self.config.result_font, padx = 5)
+            label.bind('<Button-1>', self.mouse_action)
+            label.bind('<Enter>', self.mouse_hover)
+            label.pack(side=RIGHT)
+            self.win.update()
+            print(label.winfo_width())
+            length += label.winfo_width()
+            if length > self.result_frame_width:
+                label.destroy()
+                break
+            else:
+                self.result_labels[title] = label
+
+    def show_next_page(self):
+        self.result_labels = {}
+        for widget in self.result_frame.winfo_children():
+            widget.destroy()
+
+        length = 0
+        for title in self.result[self.last_index:]:
             label = Label(self.result_frame, text=title, fg=self.config.fg, bg=self.config.bg, font=self.config.result_font, padx = 5)
             label.bind('<Button-1>', self.mouse_action)
             label.bind('<Enter>', self.mouse_hover)
             label.pack(side='left')
-            self.result_labels[title] = label
+            self.win.update()
+            length += label.winfo_width()
+            if length > self.result_frame_width:
+                label.destroy()
+                break
+            # x = label.winfo_x()
+            # if len(self.result_labels)>0 and x == 0:
+            #     label.destroy()
+            #     break
+            else:
+                self.result_labels[title] = label
+                self.last_index += 1
+
 
     def selected(self, name):
         try:
