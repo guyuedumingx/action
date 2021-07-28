@@ -19,7 +19,7 @@
     ],
     "windows-height":30,
     "scripts-path": ["script/"],
-    "lib-path" : ["C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories"],
+    "lib-path" : [],
     "scripts-file": "orders.json",
     "active-hotkey": [
         "alt",
