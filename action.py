@@ -286,6 +286,7 @@ class Bar:
             self.action(name)
 
     def action(self, name, avgs=[], flag=False):
+        self.history.append(name+" "+" ".join(avgs))
         try:
             act = self.orders[name]
             if "exit" == act:
@@ -300,12 +301,11 @@ class Bar:
                 ord = self.order
 
         ord = ord.replace('"',"")
-        self.history.append(ord)
         ord = ord.split(" ")
         back = subprocess.Popen(ord, shell=True, stdout=subprocess.PIPE)
         msg = back.stdout.readlines()
         msg = "".join([s.decode('utf-8','ignore') for s in msg])
-        title = "".join(ord)
+        title = " ".join(ord)
         log.info(title+"\n"+msg)
         if len(msg) > 0 and self.config.notification:
             toaster = ToastNotifier()
@@ -402,7 +402,7 @@ class Bar:
         try:
             self.selected_label.configure(fg=self.config.fg, bg=self.config.bg)
         except Exception as e:
-            log.err(traceback.format_exc())
+            pass
         self.selected_label = self.result_labels[name]
         self.result_labels[name].configure(fg=self.config.selected_color, bg=self.config.selected_bg)
 

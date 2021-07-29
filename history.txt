@@ -8,4 +8,7 @@ ls
 pwd
 ls -a
 ls
-ls
+BaiDu
+BaiDu main
+BaiDu main
+Bili google

@@ -15,3 +15,133 @@ README.md
 script
 temp
 
+Error:[2021-07-29 23:38:01.905687]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 403, in selected
+    self.selected_label.configure(fg=self.config.fg, bg=self.config.bg)
+AttributeError: 'NoneType' object has no attribute 'configure'
+
+Error:[2021-07-29 23:38:07.409191]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label103"
+
+Error:[2021-07-29 23:38:07.411200]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label102"
+
+Info:[2021-07-29 23:38:07.677121]--: Info:[2021-07-29 23:38:07.677121]--: python./lib/search.pyhttps://www.baidu.com/s?wd=qq” œ‰https://www.baidu.com
+
+Error:[2021-07-29 23:38:18.653086]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label161"
+
+Error:[2021-07-29 23:38:18.742126]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label160"
+
+Error:[2021-07-29 23:38:18.769985]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label159"
+
+Error:[2021-07-29 23:38:18.796241]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label141"
+
+Info:[2021-07-29 23:38:19.878505]--: Info:[2021-07-29 23:38:19.878505]--: ls
+__pycache__
+action.exe
+action.log
+action.py
+action.spec
+build
+configuration.json
+dist
+history.txt
+icon.ico
+icon.png
+lib
+orders.json
+README.md
+script
+temp
+
+Error:[2021-07-29 23:38:24.993322]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label640"
+
+Error:[2021-07-29 23:38:25.375768]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label804"
+
+Error:[2021-07-29 23:38:25.442389]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label803"
+
+Info:[2021-07-29 23:38:26.119241]--: Info:[2021-07-29 23:38:26.119241]--: ls
+__pycache__
+action.exe
+action.log
+action.py
+action.spec
+build
+configuration.json
+dist
+history.txt
+icon.ico
+icon.png
+lib
+orders.json
+README.md
+script
+temp
+
+Info:[2021-07-29 23:41:31.174844]--: Info:[2021-07-29 23:41:31.174844]--: python./lib/search.pyhttps://www.baidu.com/s?wd=qq” œ‰https://www.baidu.com
+
+Error:[2021-07-29 23:43:34.715659]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label32"
+
+Info:[2021-07-29 23:43:37.072481]--: Info:[2021-07-29 23:43:37.071483]--: python ./lib/search.py https://www.baidu.com/s?wd=main https://www.baidu.com
+
+Error:[2021-07-29 23:44:42.329867]--: Traceback (most recent call last):
+  File "e:\python\search\action.py", line 390, in show_next_page
+    length += label.winfo_width()
+  File "C:\Python39\lib\tkinter\__init__.py", line 1298, in winfo_width
+    self.tk.call('winfo', 'width', self._w))
+_tkinter.TclError: bad window path name ".!frame.!label39"
+
+Info:[2021-07-29 23:44:43.992728]--: Info:[2021-07-29 23:44:43.992728]--: python ./lib/search.py https://www.baidu.com/s?wd=main https://www.baidu.com
+
+Info:[2021-07-29 23:44:46.983239]--: Info:[2021-07-29 23:44:46.983239]--: python ./lib/search.py https://www.baidu.com/s?wd=main https://www.baidu.com
+
+Info:[2021-07-29 23:44:53.157669]--: Info:[2021-07-29 23:44:53.157669]--: python ./lib/search.py https://search.bilibili.com/all?keyword=google https://www.bilibili.com
+
