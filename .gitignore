@@ -2,3 +2,5 @@
 temp/
 dist/
 build/
+action.log
+history.txt

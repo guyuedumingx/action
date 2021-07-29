@@ -145,3 +145,5 @@ Info:[2021-07-29 23:44:46.983239]--: Info:[2021-07-29 23:44:46.983239]--: python
 
 Info:[2021-07-29 23:44:53.157669]--: Info:[2021-07-29 23:44:53.157669]--: python ./lib/search.py https://search.bilibili.com/all?keyword=google https://www.bilibili.com
 
+Info:[2021-07-29 23:45:26.263553]--: Info:[2021-07-29 23:45:26.263553]--: python ./lib/search.py https://github.com/search?q= https://github.com
+
