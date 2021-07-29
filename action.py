@@ -1,3 +1,4 @@
+#coding=utf-8
 import os
 import subprocess
 import tkinter as tk
@@ -9,6 +10,8 @@ import win32con
 from win10toast import ToastNotifier
 import json
 import winreg
+import datetime
+import traceback
 
 
 def kill(config):
@@ -58,7 +61,7 @@ def load_software(config):
                 except:
                     name = key_name
                 software_name[name] = Pos
-            except WindowsError:
+            except WindowsError as e:
                 pass
     filter(config, software_name)
     rename(config, software_name)
@@ -69,8 +72,8 @@ def filter(config, software):
     for name in names:
         try:
             del software[name]
-        except:
-            pass
+        except Exception as e:
+            log.err(traceback.format_exc())
 
 def rename(config, software):
     names = config.rename
@@ -78,8 +81,8 @@ def rename(config, software):
         try:
             software[names[name]] = software[name]
             del software[name]
-        except:
-            pass
+        except Exception as e:
+            log.err(traceback.format_exc())
 
 def load_json(name):
     with open(name, "r", encoding="utf-8") as f:
@@ -97,8 +100,8 @@ def load_scripts(config):
     if(config.load_software):
         try:
             scripts.update(load_software(config))
-        except:
-            pass
+        except Exception as e:
+            log.err(traceback.format_exc())
     return scripts
 
 class Config:
@@ -184,7 +187,7 @@ class Bar:
         self.key_label.bind("<Tab>", self.next)
         self.key_label.bind("<Control-v>", self.paste_action)
         self.key_label.bind("<KeyPress-Right>", self.next)
-        self.key_label.bind("<KeyPress-Down>", self.next)
+        self.key_label.bind("<KeyPress-Down>", self.next_order)
         self.key_label.bind("<KeyPress-Left>", self.preview)
         self.key_label.bind("<KeyPress-Up>", self.pre_order)
         self.key_label.bind("<Control-u>", self.clear)
@@ -196,6 +199,11 @@ class Bar:
 
         self.update()
         self.win.mainloop()
+
+    def next_order(self, event):
+        next = self.history.get_next()
+        self._update_order(next)
+
     
     def pre_order(self, event):
         pre = self.history.get_preview()
@@ -214,8 +222,8 @@ class Bar:
             self.order = self.result[self.selected_index+self.last_index-len(self.result_labels)]
             self.selected(self.order)
             self._update_order(self.order)
-        except:
-            pass
+        except Exception as e:
+            log.err(traceback.format_exc())
 
     def next(self, event):
         self.selected_index += 1
@@ -226,8 +234,8 @@ class Bar:
             self.order = self.result[self.selected_index+self.last_index-len(self.result_labels)]
             self.selected(self.order)
             self._update_order(self.order)
-        except:
-            pass
+        except Exception as e:
+            log.err(traceback.format_exc())
 
     def delete(self, event):
         self.order = self.order[:-1]
@@ -242,6 +250,7 @@ class Bar:
         self._update_order(self.order)
         self.selected_index = -1 
         self.update()
+        self.history.flush()
 
     def mouse_action(self, event):
         widget = event.widget
@@ -291,14 +300,16 @@ class Bar:
                 ord = self.order
 
         ord = ord.replace('"',"")
-        ord = ord.split(" ")
         self.history.append(ord)
+        ord = ord.split(" ")
         back = subprocess.Popen(ord, shell=True, stdout=subprocess.PIPE)
         msg = back.stdout.readlines()
         msg = "".join([s.decode('utf-8','ignore') for s in msg])
+        title = "".join(ord)
+        log.info(title+"\n"+msg)
         if len(msg) > 0 and self.config.notification:
             toaster = ToastNotifier()
-            toaster.show_toast("".join(ord),msg,
+            toaster.show_toast(title,msg,
                     icon_path="icon.ico",
                     duration=5,
                     threaded=True)
@@ -316,6 +327,7 @@ class Bar:
         win32gui.SetForegroundWindow(w2hd)
         self._update_order("")
         self.update()
+        self.history.flush()
     
     def _update_order(self, order):
         self.order = order
@@ -351,8 +363,8 @@ class Bar:
             self.win.update()
             try:
                 length += label.winfo_width()
-            except:
-                pass
+            except Exception as e:
+                log.err(traceback.format_exc())
             if length > self.result_frame_width:
                 label.destroy()
                 break
@@ -376,8 +388,8 @@ class Bar:
                 self.win.update()
                 try:
                     length += label.winfo_width()
-                except:
-                    pass
+                except Exception as e:
+                    log.err(traceback.format_exc())
                 if length > self.result_frame_width:
                     label.destroy()
                     break
@@ -389,19 +401,42 @@ class Bar:
     def selected(self, name):
         try:
             self.selected_label.configure(fg=self.config.fg, bg=self.config.bg)
-        except:
-            pass
+        except Exception as e:
+            log.err(traceback.format_exc())
         self.selected_label = self.result_labels[name]
         self.result_labels[name].configure(fg=self.config.selected_color, bg=self.config.selected_bg)
 
-class History():
+class Log:
+
+    def __init__(self, config=None):
+        self.file = "action.log"
+        self.model = "{}:[{}]--: {}"
+
+
+    def append(self, msg):
+        with open(self.file, 'a') as f:
+            f.write(msg+'\n')
+    
+    def debug(self, msg):
+        msg = self.model.format("Debug",datetime.datetime.now(), msg)
+        self.append(msg)
+
+    def info(self, msg):
+        msg = self.model.format("Info",datetime.datetime.now(), msg)
+        msg = "Info:[{}]--: {}".format(datetime.datetime.now(), msg)
+        self.append(msg)
+
+    def err(self, msg):
+        msg = self.model.format("Error",datetime.datetime.now(), msg)
+        self.append(msg)
+
+
+class History:
 
     def __init__(self, config=None):
         self.config = config
         self.file = 'history.txt'
-        self.max_length = 30
-        self.buf_length = 2 
-        self.isLast = True
+        self.buf_length = 20 
         self.init()
 
     def init(self):
@@ -422,36 +457,40 @@ class History():
 
     def append(self, order):
         self.buffer.append(order)
-        self.buf_cursor += 1
         self.length += 1
-        self.file_cursor += 1
         self.has_next = True
         with open(self.file, 'a') as f:
             f.write(order+'\n')
-    
-        if not self.isLast:
-            self.isLast = True
-            self.init()
 
     def update_buf(self):
         if self.has_next:
-            self.isLast = False
             with open(self.file, 'r') as f:
                 his = f.readlines()
 
                 if self.file_cursor > self.buf_length:
-                    self.buffer = his[self.file_cursor-self.buf_length:self.file_cursor]
+                    self.buffer = his[self.file_cursor-self.buf_length:self.file_cursor] + self.buffer
                     self.file_cursor = self.file_cursor-self.buf_length
                     self.has_next = True
                     self.buf_cursor = self.buf_length - 1
                 else:
-                    self.buffer = his[:self.file_cursor]
+                    reads = his[:self.file_cursor]
+                    self.buffer = reads + self.buffer
                     self.file_cursor = 0
                     self.has_next = False 
-                    self.buf_cursor = len(self.buffer) - 1
+                    self.buf_cursor = len(reads) - 1
         else:
-            self.buf_cursor = 1
+            self.buf_cursor = 0 
+    
+    def flush(self):
+        self.buf_cursor = len(self.buffer)
 
+    def get_next(self):
+        self.buf_cursor += 1
+        if self.buf_cursor < len(self.buffer):
+            return self.buffer[self.buf_cursor].strip()
+        else:
+            self.buf_cursor = len(self.buffer)
+            return ""
     
     def get_preview(self):
         self.buf_cursor -= 1
@@ -460,14 +499,11 @@ class History():
         try:
             return self.buffer[self.buf_cursor].strip()
         except:
-            try:
-                self.buf_cursor = len(self.buffer) - 1
-                return self.buffer[self.buf_cursor].strip()
-            except:
-                return ""
+            return ""
         
     
 
 config = Config(config_info)
+log = Log(config)
 kill(config)
 bar = Bar(config, load_scripts(config)) 

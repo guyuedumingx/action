@@ -1,11 +1,11 @@
-google2
-google1
-google3
-google2
-google1
-google3
-gogle2
-nihco
-nihco2
-nihco2
-nihdadco2
+ls
+pwd
+ls -a
+la
+chdir
+ls
+ls
+pwd
+ls -a
+ls
+ls
