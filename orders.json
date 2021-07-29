@@ -1,15 +1,14 @@
 {
     "Code" : "code.cmd",
-    "Csdn" : "start msedge https://so.csdn.net/so/search?q=$@",
-    "BaiDu" : "start msedge https://www.baidu.com/s?wd=$@",
-    "Bing" : "start msedge https://cn.bing.com/search?q=$@",
-    "ZhiHu" : "start msedge https://www.zhihu.com/search?q=$@",
-    "Runoob" : "start msedge https://www.runoob.com/?s=$@",
-    "Github" : "start msedge https://github.com/search?q=$@",
-    "Zhihu" : "python ./script/search.py https://www.zhihu.com/search?q=$@ https://www.zhihu.com",
+    "Csdn" : "python ./lib/search.py https://so.csdn.net/so/search?q=$@ https://www.csdn.net/",
+    "BaiDu" : "python ./lib/search.py https://www.baidu.com/s?wd=$@ https://www.baidu.com",
+    "Bing" : "python ./lib/search.py https://cn.bing.com/search?q=$@ https://cn.bing.com",
+    "Runoob" : "python ./lib/search.py https://www.runoob.com/?s=$@ https://www.runoob.com/",
+    "Github" : "python ./lib/search.py https://github.com/search?q=$@ https://github.com",
+    "Zhihu" : "python ./lib/search.py https://www.zhihu.com/search?q=$@ https://www.zhihu.com",
+    "Bili" : "python ./lib/search.py https://search.bilibili.com/all?keyword=$@ https://www.bilibili.com",
     "Open" : "start msedge $@",
     "Cmder" : "start F:\\package\\cmder\\cmder.exe",
-    "Bili" : "start msedge https://search.bilibili.com/all?keyword=$@",
     "Explorer" : "explorer $@",
     "Exit" : "exit"
 }
