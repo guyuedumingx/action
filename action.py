@@ -286,9 +286,9 @@ class Bar:
             self.action(name)
 
     def action(self, name, avgs=[], flag=False):
-        self.history.append(name+" "+" ".join(avgs))
         try:
             act = self.orders[name]
+            self.history.append(name+" "+" ".join(avgs))
             if "exit" == act:
                 self.win.destroy()
             else:
@@ -299,6 +299,7 @@ class Bar:
                 return None
             else:
                 ord = self.order
+                self.history.append(ord)
 
         ord = ord.replace('"',"")
         ord = ord.split(" ")
@@ -410,6 +411,9 @@ class Log:
 
     def __init__(self, config=None):
         self.file = "action.log"
+        if not os.path.exists(self.file):
+            with open(self.file, 'w') as f:
+                pass
         self.model = "{}:[{}]--: {}"
 
 
@@ -436,6 +440,9 @@ class History:
     def __init__(self, config=None):
         self.config = config
         self.file = 'history.txt'
+        if not os.path.exists(self.file):
+            with open(self.file, 'w') as f:
+                pass
         self.buf_length = 20 
         self.init()
 
