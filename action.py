@@ -8,7 +8,7 @@ import win32api
 import win32con
 import json
 import winreg
-import win32process
+
 
 def kill(config):
     title = config.windows_title
