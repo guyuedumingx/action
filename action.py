@@ -6,6 +6,7 @@ from system_hotkey import SystemHotkey
 import win32gui
 import win32api
 import win32con
+from win10toast import ToastNotifier
 import json
 import winreg
 
@@ -134,6 +135,8 @@ class Config:
         self.load_software = config['load-software']
         self.filters = config['filters']
         self.libs = config['lib-path']
+        self.notification = config['notification']
+        self.hover_input = config['hover-input']
 
 
 class Bar:
@@ -149,6 +152,7 @@ class Bar:
         self.win['background'] = config.bg
         self.win.title(config.windows_title)
         self.win.overrideredirect(True)
+        self.history = History(config)
 
         # 关键字gui
         self.key = StringVar()
@@ -182,7 +186,7 @@ class Bar:
         self.key_label.bind("<KeyPress-Right>", self.next)
         self.key_label.bind("<KeyPress-Down>", self.next)
         self.key_label.bind("<KeyPress-Left>", self.preview)
-        self.key_label.bind("<KeyPress-Up>", self.preview)
+        self.key_label.bind("<KeyPress-Up>", self.pre_order)
         self.key_label.bind("<Control-u>", self.clear)
         self.result_frame.pack(side='left')
         self.win.update()
@@ -192,6 +196,10 @@ class Bar:
 
         self.update()
         self.win.mainloop()
+    
+    def pre_order(self, event):
+        pre = self.history.get_preview()
+        self._update_order(pre)
 
     def clear(self, event):
         self._update_order("")
@@ -255,7 +263,8 @@ class Bar:
     def mouse_hover(self, event):
         widget = event.widget
         name = widget['text']
-        self._update_order(name)
+        if self.config.hover_input:
+            self._update_order(name)
         self.selected(name)
 
     def key_action(self, event):
@@ -283,7 +292,16 @@ class Bar:
 
         ord = ord.replace('"',"")
         ord = ord.split(" ")
-        subprocess.call(ord, shell=True)
+        self.history.append(ord)
+        back = subprocess.Popen(ord, shell=True, stdout=subprocess.PIPE)
+        msg = back.stdout.readlines()
+        msg = "".join([s.decode('utf-8','ignore') for s in msg])
+        if len(msg) > 0 and self.config.notification:
+            toaster = ToastNotifier()
+            toaster.show_toast("".join(ord),msg,
+                    icon_path="icon.ico",
+                    duration=5,
+                    threaded=True)
 
         self.hide()
 
@@ -375,6 +393,80 @@ class Bar:
             pass
         self.selected_label = self.result_labels[name]
         self.result_labels[name].configure(fg=self.config.selected_color, bg=self.config.selected_bg)
+
+class History():
+
+    def __init__(self, config=None):
+        self.config = config
+        self.file = 'history.txt'
+        self.max_length = 30
+        self.buf_length = 2 
+        self.isLast = True
+        self.init()
+
+    def init(self):
+        with open(self.file, 'r') as f:
+            his = f.readlines()
+            self.length = len(his)
+
+            if self.length > self.buf_length:
+                self.file_cursor = self.length - self.buf_length
+                self.buffer = his[self.file_cursor:]
+                self.has_next = True
+                self.buf_cursor = self.buf_length
+            else:
+                self.buffer = his
+                self.buf_cursor = self.length
+                self.file_cursor = 0
+                self.has_next = False 
+
+    def append(self, order):
+        self.buffer.append(order)
+        self.buf_cursor += 1
+        self.length += 1
+        self.file_cursor += 1
+        self.has_next = True
+        with open(self.file, 'a') as f:
+            f.write(order+'\n')
+    
+        if not self.isLast:
+            self.isLast = True
+            self.init()
+
+    def update_buf(self):
+        if self.has_next:
+            self.isLast = False
+            with open(self.file, 'r') as f:
+                his = f.readlines()
+
+                if self.file_cursor > self.buf_length:
+                    self.buffer = his[self.file_cursor-self.buf_length:self.file_cursor]
+                    self.file_cursor = self.file_cursor-self.buf_length
+                    self.has_next = True
+                    self.buf_cursor = self.buf_length - 1
+                else:
+                    self.buffer = his[:self.file_cursor]
+                    self.file_cursor = 0
+                    self.has_next = False 
+                    self.buf_cursor = len(self.buffer) - 1
+        else:
+            self.buf_cursor = 1
+
+    
+    def get_preview(self):
+        self.buf_cursor -= 1
+        if self.buf_cursor < 0:
+            self.update_buf()
+        try:
+            return self.buffer[self.buf_cursor].strip()
+        except:
+            try:
+                self.buf_cursor = len(self.buffer) - 1
+                return self.buffer[self.buf_cursor].strip()
+            except:
+                return ""
+        
+    
 
 config = Config(config_info)
 kill(config)

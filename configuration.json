@@ -8,6 +8,8 @@
     "max-key-length": 20,
     "key-left-margin": 5,
     "load-software": true,
+    "notification" : true,
+    "hover-input" : false,
     "key-font":[
         "微软雅黑",
         "14",
