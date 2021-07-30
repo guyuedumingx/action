@@ -25,6 +25,7 @@
     "scripts-file": "orders.json",
     "active-hotkey": [
         "alt",
+        "shift",
         "p"
     ],
     "filters":[

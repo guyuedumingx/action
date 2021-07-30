@@ -7,11 +7,11 @@ from system_hotkey import SystemHotkey
 import win32gui
 import win32api
 import win32con
-from win10toast import ToastNotifier
 import json
 import winreg
 import datetime
 import traceback
+import threading
 
 
 def kill(config):
@@ -284,8 +284,8 @@ class Bar:
         else:
             name = self.order
             self.action(name)
-
-    def action(self, name, avgs=[], flag=False):
+    
+    def thread_action(self, name, avgs=[], flag=False):
         try:
             act = self.orders[name]
             self.history.append(name+" "+" ".join(avgs))
@@ -295,7 +295,7 @@ class Bar:
                 ord = act.replace("$@", " ".join(avgs))
         except:
             if not flag:
-                self.action(name+" "+" ".join(avgs), flag= True)
+                self.thread_action(name+" "+" ".join(avgs), flag= True)
                 return None
             else:
                 ord = self.order
@@ -303,19 +303,24 @@ class Bar:
 
         ord = ord.replace('"',"")
         ord = ord.split(" ")
-        back = subprocess.Popen(ord, shell=True, stdout=subprocess.PIPE)
-        msg = back.stdout.readlines()
-        msg = "".join([s.decode('utf-8','ignore') for s in msg])
+        back = subprocess.call(ord, shell=True)
+        msg = back
+        # msg = "".join([s.decode('utf-8','ignore') for s in msg])
         title = " ".join(ord)
-        log.info(title+"\n"+msg)
-        if len(msg) > 0 and self.config.notification:
-            toaster = ToastNotifier()
-            toaster.show_toast(title,msg,
-                    icon_path="icon.ico",
-                    duration=5,
-                    threaded=True)
+        log.info(title+"\n"+str(msg))
+        # if len(msg) > 0 and self.config.notification:
+        #     toaster = ToastNotifier()
+        #     toaster.show_toast(title,msg,
+        #             icon_path="icon.ico",
+        #             duration=5,
+        #             threaded=True)
 
+
+    def action(self, name, avgs=[], flag=False):
+        print("in")
+        threading.Thread(target=self.thread_action,args=(name,avgs,flag)).start()
         self.hide()
+        print("out")
 
     def hide(self, event=None):
         self.selected_index = 0
@@ -388,6 +393,7 @@ class Bar:
                 label.pack(side='left')
                 self.win.update()
                 try:
+                    print(length)
                     length += label.winfo_width()
                 except Exception as e:
                     log.err(traceback.format_exc())
@@ -513,4 +519,4 @@ class History:
 config = Config(config_info)
 log = Log(config)
 kill(config)
-bar = Bar(config, load_scripts(config)) 
+bar = Bar(config, load_scripts(config))
